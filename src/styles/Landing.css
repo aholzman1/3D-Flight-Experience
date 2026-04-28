@@ -1,0 +1,141 @@
+.landing {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: Futura, 'Trebuchet MS', Arial, sans-serif;
+}
+
+.landing-content {
+  text-align: center;
+  color: white;
+  animation: fadeIn 0.8s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.landing-title {
+  font-size: 5.5rem;
+  font-weight: 300;
+  margin: 0;
+  margin-bottom: 0.5rem;
+  letter-spacing: 3px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  text-transform: uppercase;
+}
+
+.landing-credit {
+  font-size: 1.2rem;
+  margin: 0;
+  margin-bottom: 3rem;
+  font-weight: 300;
+  opacity: 0.9;
+  letter-spacing: 1px;
+}
+
+.landing-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.landing-btn {
+  padding: 1rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.start-btn {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.start-btn:hover {
+  background-color: #1a1a1a;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+.start-btn:active {
+  transform: translateY(0);
+}
+
+.info-btn {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid white;
+}
+
+.info-btn:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3);
+}
+
+.info-btn:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .landing-title {
+    font-size: 2.5rem;
+    letter-spacing: 2px;
+  }
+
+  .landing-credit {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .landing-btn {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    min-width: 200px;
+  }
+
+  .landing-buttons {
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .landing-title {
+    font-size: 1.8rem;
+    letter-spacing: 1px;
+  }
+
+  .landing-credit {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .landing-btn {
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    min-width: 160px;
+  }
+
+  .landing-buttons {
+    gap: 0.8rem;
+  }
+}

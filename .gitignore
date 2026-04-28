@@ -1,0 +1,5 @@
+node_modules/*
+*.zip
+*.blend
+tree4.glb
+src/assets/models/*

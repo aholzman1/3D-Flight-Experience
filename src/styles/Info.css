@@ -1,0 +1,121 @@
+.info {
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+  font-family: Futura, 'Trebuchet MS', Arial, sans-serif;
+}
+
+.info-content {
+  max-width: 700px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 12px;
+  padding: 3rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.info-content h1 {
+  color: #667eea;
+  font-size: 2.5rem;
+  margin-top: 0;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.info-content h2 {
+  color: #764ba2;
+  font-size: 1.4rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.info-content p {
+  color: #333;
+  line-height: 1.8;
+  margin: 1rem 0;
+  font-size: 1rem;
+}
+
+.info-content ul {
+  list-style: none;
+  padding: 0;
+  color: #333;
+}
+
+.info-content li {
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  line-height: 1.8;
+}
+
+.info-content li:before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #667eea;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.info-content section {
+  color: #333;
+}
+
+.back-btn {
+  display: block;
+  margin: 3rem auto 0;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.back-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.back-btn:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .info-content {
+    padding: 2rem;
+  }
+
+  .info-content h1 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .info-content h2 {
+    font-size: 1.1rem;
+  }
+
+  .info-content p {
+    font-size: 0.95rem;
+  }
+}

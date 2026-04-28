@@ -65,7 +65,11 @@ function App() {
         }}
         gl={{ 
           antialias: true, 
-          shadowMap: { enabled: true, type: THREE.PCFShadowMap }
+          shadowMap: { 
+            enabled: true, 
+            type: THREE.VSMShadowMap,
+            autoUpdate: true
+          }
         }}
       >
         <Scene isActive={isActive && !isPaused} resetCount={resetCount} />

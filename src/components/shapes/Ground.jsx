@@ -90,7 +90,6 @@ function Ground() {
       vertexColors: true,
       roughness: 0.7,
       metalness: 0,
-      shadowSide: THREE.FrontSide
     })
     
     console.log('Ground geometry created with', geo.attributes.position.count, 'vertices')
@@ -101,7 +100,7 @@ function Ground() {
   }, [])
 
   return (
-    <mesh position={[0, 0, 0]} geometry={geometry} material={material} receiveShadow={true} castShadow={true} />
+    <mesh position={[0, 0, 0]} geometry={geometry} material={material} receiveShadow={false} castShadow={false} />
   )
 }
 

@@ -145,17 +145,18 @@ function Scene({ isActive, resetCount }) {
     // Target the center of the world
     light.target.position.set(0, 50, 0)
     
-    // Configure shadow map - large coverage area
-    light.shadow.mapSize.width = 4096
-    light.shadow.mapSize.height = 4096
+    // Configure shadow map - large coverage area with proper format
+    light.shadow.mapSize.width = 2048
+    light.shadow.mapSize.height = 2048
     light.shadow.camera.left = -2500
     light.shadow.camera.right = 2500
     light.shadow.camera.top = 2500
     light.shadow.camera.bottom = -2500
-    light.shadow.camera.near = 0.01
+    light.shadow.camera.near = 0.5
     light.shadow.camera.far = 2000
-    light.shadow.bias = -0.001
-    light.shadow.normalBias = 0.05
+    light.bias = -0.0001
+    light.shadow.normalBias = 0.02
+    light.shadow.radius = 4
     
     scene.add(light)
     scene.add(light.target)

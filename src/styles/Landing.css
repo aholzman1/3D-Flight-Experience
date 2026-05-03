@@ -4,8 +4,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.4) 0%, rgba(118, 75, 162, 0.4) 100%);
+  backdrop-filter: blur(2px);
   font-family: Futura, 'Trebuchet MS', Arial, sans-serif;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
 }
 
 .landing-content {

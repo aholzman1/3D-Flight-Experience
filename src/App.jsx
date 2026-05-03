@@ -2,8 +2,11 @@ import { Canvas } from '@react-three/fiber'
 import { useEffect, useState } from 'react'
 import * as THREE from 'three'
 import Scene from './components/Scene'
+import LandingSceneBackground from './components/LandingSceneBackground'
 import Landing from './pages/Landing'
 import Info from './pages/Info'
+import { getTerrainHeight } from './utils/terrain'
+import { getRandomColorScheme } from './utils/colorSchemes'
 import './App.css'
 
 function App() {
@@ -11,6 +14,82 @@ function App() {
   const [isActive, setIsActive] = useState(true)
   const [isPaused, setIsPaused] = useState(false)
   const [resetCount, setResetCount] = useState(0)
+  const [objects, setObjects] = useState([])
+  const [colorScheme, setColorScheme] = useState(null)
+
+  // Generate trees and color scheme for landing background
+  useEffect(() => {
+    const generateTrees = () => {
+      const trees = []
+      const maxAttempts = 30000
+      let attempts = 0
+
+      while (trees.length < 1200 && attempts < maxAttempts) {
+        const x = (Math.random() - 0.5) * 3000
+        const z = (Math.random() - 0.5) * 3000
+        let height = Math.random() * 120 + 30
+
+        let collision = false
+        const radius = height / 2
+        
+        if (Math.abs(x) + radius > 1800 || Math.abs(z) + radius > 1800) {
+          collision = true
+        }
+
+        const playerSpawnRadius = 15
+        const distToPlayer = Math.sqrt(x * x + z * z)
+        if (distToPlayer < playerSpawnRadius) {
+          collision = true
+        }
+
+        const PLAYER_PATH_WIDTH = 25
+        if (Math.abs(x) < PLAYER_PATH_WIDTH) {
+          collision = true
+        }
+
+        for (let tree of trees) {
+          const dx = x - tree.x
+          const dz = z - tree.z
+          const distance = Math.sqrt(dx * dx + dz * dz)
+          const minDistance = (radius + tree.size / 2 + 2) * 0.35
+          if (distance < minDistance) {
+            collision = true
+            break
+          }
+        }
+
+        if (!collision) {
+          const isBush = Math.random() < 0.5
+          const terrainHeight = getTerrainHeight(x, z)
+          
+          let yOffset
+          if (isBush) {
+            yOffset = terrainHeight - (height * 2/3)
+          } else {
+            yOffset = terrainHeight - (height * 0.2)
+          }
+          
+          trees.push({
+            x,
+            z,
+            height,
+            type: 'tree',
+            size: height / 2,
+            rotation: [0, Math.random() * Math.PI * 2, 0],
+            treeIndex: Math.floor(Math.random() * 3) + 1,
+            isBush: isBush,
+            yOffset: yOffset
+          })
+        }
+        attempts++
+      }
+
+      return trees
+    }
+    
+    setObjects(generateTrees())
+    setColorScheme(getRandomColorScheme())
+  }, [])
 
   // Handle Escape key to pause/unpause
   useEffect(() => {
@@ -43,9 +122,32 @@ function App() {
     setIsActive(true)
   }
 
-  // Landing page
+  // Landing page with background scene
   if (page === 'landing') {
-    return <Landing onStartExperience={() => setPage('experience')} onInfo={() => setPage('info')} />
+    return (
+      <div className="app-landing">
+        <Canvas
+          className="landing-canvas"
+          camera={{
+            position: [200, 120, 800],
+            fov: 45,
+            near: 0.1,
+            far: 5000,
+          }}
+          gl={{ 
+            antialias: true, 
+            shadowMap: { 
+              enabled: true, 
+              type: THREE.VSMShadowMap,
+              autoUpdate: true
+            }
+          }}
+        >
+          {colorScheme && <LandingSceneBackground objects={objects} colorScheme={colorScheme} />}
+        </Canvas>
+        <Landing onStartExperience={() => setPage('experience')} onInfo={() => setPage('info')} />
+      </div>
+    )
   }
 
   // Info page

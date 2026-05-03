@@ -157,6 +157,25 @@ function App() {
   if (page === 'info') {
     return (
       <div className="app-info">
+        <Canvas
+          className="info-canvas"
+          camera={{
+            position: [0, 150, 600],
+            fov: 45,
+            near: 0.1,
+            far: 5000,
+          }}
+          gl={{ 
+            antialias: true, 
+            shadowMap: { 
+              enabled: true, 
+              type: THREE.VSMShadowMap,
+              autoUpdate: true
+            }
+          }}
+        >
+          {colorScheme && objects.length > 0 && <LandingSceneBackground objects={objects} colorScheme={colorScheme} />}
+        </Canvas>
         <Info onBack={() => setPage('landing')} />
       </div>
     )

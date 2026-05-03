@@ -18,10 +18,11 @@ function LandingSceneBackground({ objects: initialObjects, colorScheme: initialC
   const directionRef = useRef(Math.random() > 0.5 ? 1 : -1) // 1 for right, -1 for left
   const [objects, setObjects] = useState(initialObjects)
   const [colorScheme, setColorScheme] = useState(initialColorScheme)
+  const previousColorNameRef = useRef(initialColorScheme?.name)
   
-  const SWITCH_INTERVAL = 5 // seconds
+  const SWITCH_INTERVAL = 4 // seconds
   const FADE_DURATION = 1.5 // seconds for fade in/out
-  const MOVEMENT_SPEED = 0.3 // units per second (linear movement)
+  const MOVEMENT_SPEED = 0.4 // units per second (linear movement) - 33% faster
 
   // Setup camera path for smooth auto-flight
   useEffect(() => {
@@ -172,7 +173,15 @@ function LandingSceneBackground({ objects: initialObjects, colorScheme: initialC
         if (fadeOutProgress >= 1) {
           // Switch scenes at halfway point
           setObjects(generateTrees())
-          setColorScheme(getRandomColorScheme())
+          
+          // Generate new color scheme, ensuring it's different from previous
+          let newColorScheme = getRandomColorScheme()
+          while (newColorScheme.name === previousColorNameRef.current) {
+            newColorScheme = getRandomColorScheme()
+          }
+          previousColorNameRef.current = newColorScheme.name
+          setColorScheme(newColorScheme)
+          
           fadeOutProgress = 1
           clearInterval(fadeOutInterval)
           

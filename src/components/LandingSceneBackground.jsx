@@ -16,6 +16,7 @@ function LandingSceneBackground({ objects: initialObjects, colorScheme: initialC
   const lightRef = useRef(null)
   const fadeOverlayRef = useRef(null)
   const directionRef = useRef(Math.random() > 0.5 ? 1 : -1) // 1 for right, -1 for left
+  const isTransitioningRef = useRef(false) // Prevent multiple transitions at once
   const [objects, setObjects] = useState(initialObjects)
   const [colorScheme, setColorScheme] = useState(initialColorScheme)
   const previousColorNameRef = useRef(initialColorScheme?.name)
@@ -158,8 +159,9 @@ function LandingSceneBackground({ objects: initialObjects, colorScheme: initialC
     timeRef.current += 1 / 60
     switchTimerRef.current += 1 / 60
 
-    // Check if it's time to switch scenes
-    if (switchTimerRef.current >= SWITCH_INTERVAL) {
+    // Check if it's time to switch scenes (only if not already transitioning)
+    if (switchTimerRef.current >= SWITCH_INTERVAL && !isTransitioningRef.current) {
+      isTransitioningRef.current = true
       switchTimerRef.current = 0
       directionRef.current = Math.random() > 0.5 ? 1 : -1 // Randomize direction for next cycle
       
@@ -193,6 +195,7 @@ function LandingSceneBackground({ objects: initialObjects, colorScheme: initialC
               if (fadeOverlayRef.current) {
                 fadeOverlayRef.current.material.opacity = 0
               }
+              isTransitioningRef.current = false // Allow next transition
               clearInterval(fadeInInterval)
             } else {
               if (fadeOverlayRef.current) {

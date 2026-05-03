@@ -153,9 +153,13 @@ function App() {
     )
   }
 
-  // Info page
+  // Info page with background scene
   if (page === 'info') {
-    return <Info onBack={() => setPage('landing')} />
+    return (
+      <div className="app-info">
+        <Info onBack={() => setPage('landing')} />
+      </div>
+    )
   }
 
   // Experience page

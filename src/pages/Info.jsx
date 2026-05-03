@@ -3,8 +3,9 @@ import '../styles/Info.css'
 function Info({ onBack }) {
   return (
     <div className="info">
-      <div className="info-content">
-        <h1>About Dreamy Flight</h1>
+      <div className="info-fade-overlay"></div>
+      <div className="info-box">
+        <h1>ABOUT FLIGHT DREAM</h1>
         
         <section>
           <h2>Experience the Magic</h2>

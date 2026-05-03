@@ -13,10 +13,11 @@ function LandingSceneBackground({ objects: initialObjects, colorScheme: initialC
   const { camera, scene } = useThree()
   const timeRef = useRef(0)
   const switchTimerRef = useRef(0)
+  const transitionProgressRef = useRef(0) // Tracks fade transition (0-1)
+  const isTransitioningRef = useRef(false)
   const lightRef = useRef(null)
   const fadeOverlayRef = useRef(null)
   const directionRef = useRef(Math.random() > 0.5 ? 1 : -1) // 1 for right, -1 for left
-  const isTransitioningRef = useRef(false) // Prevent multiple transitions at once
   const [objects, setObjects] = useState(initialObjects)
   const [colorScheme, setColorScheme] = useState(initialColorScheme)
   const previousColorNameRef = useRef(initialColorScheme?.name)
@@ -27,9 +28,19 @@ function LandingSceneBackground({ objects: initialObjects, colorScheme: initialC
 
   // Setup camera path for smooth auto-flight
   useEffect(() => {
-    camera.position.set(200, 120, 800)
-    camera.lookAt(0, 60, 0)
-  }, [camera])
+    // Calculate center of mass for tree positions to find dense area
+    if (initialObjects.length > 0) {
+      const centerX = initialObjects.reduce((sum, obj) => sum + obj.x, 0) / initialObjects.length
+      const centerZ = initialObjects.reduce((sum, obj) => sum + obj.z, 0) / initialObjects.length
+      
+      // Position camera where trees are visible, looking at center of tree cluster
+      camera.position.set(centerX - 300, 120, centerZ + 800)
+      camera.lookAt(centerX, 60, centerZ)
+    } else {
+      camera.position.set(200, 120, 800)
+      camera.lookAt(0, 60, 0)
+    }
+  }, [camera, initialObjects])
 
   // Setup shadows and fade overlay
   useEffect(() => {
@@ -155,60 +166,57 @@ function LandingSceneBackground({ objects: initialObjects, colorScheme: initialC
 
   // Handle scene switching with fade transitions
   useFrame((state) => {
-    // Increment timers (in seconds)
-    timeRef.current += 1 / 60
-    switchTimerRef.current += 1 / 60
-
-    // Check if it's time to switch scenes (only if not already transitioning)
-    if (switchTimerRef.current >= SWITCH_INTERVAL && !isTransitioningRef.current) {
-      isTransitioningRef.current = true
-      switchTimerRef.current = 0
-      directionRef.current = Math.random() > 0.5 ? 1 : -1 // Randomize direction for next cycle
+    const deltaTime = 1 / 60 // Roughly 16ms per frame
+    
+    // Increment timers
+    timeRef.current += deltaTime
+    
+    if (isTransitioningRef.current) {
+      // Update transition progress
+      transitionProgressRef.current += deltaTime / FADE_DURATION
       
-      // Fade out -> switch -> fade in
-      const switchDuration = FADE_DURATION / 2
-      
-      // Start fade out
-      let fadeOutProgress = 0
-      const fadeOutInterval = setInterval(() => {
-        fadeOutProgress += 0.016 / switchDuration // Based on ~60fps
-        if (fadeOutProgress >= 1) {
-          // Switch scenes at halfway point
-          setObjects(generateTrees())
-          
-          // Generate new color scheme, ensuring it's different from previous
-          let newColorScheme = getRandomColorScheme()
-          while (newColorScheme.name === previousColorNameRef.current) {
-            newColorScheme = getRandomColorScheme()
-          }
-          previousColorNameRef.current = newColorScheme.name
-          setColorScheme(newColorScheme)
-          
-          fadeOutProgress = 1
-          clearInterval(fadeOutInterval)
-          
-          // Start fade in
-          let fadeInProgress = 0
-          const fadeInInterval = setInterval(() => {
-            fadeInProgress += 0.016 / switchDuration
-            if (fadeInProgress >= 1) {
-              if (fadeOverlayRef.current) {
-                fadeOverlayRef.current.material.opacity = 0
-              }
-              isTransitioningRef.current = false // Allow next transition
-              clearInterval(fadeInInterval)
-            } else {
-              if (fadeOverlayRef.current) {
-                fadeOverlayRef.current.material.opacity = 1 - fadeInProgress
-              }
-            }
-          }, 16)
-        } else {
-          if (fadeOverlayRef.current) {
-            fadeOverlayRef.current.material.opacity = fadeOutProgress
-          }
+      if (transitionProgressRef.current >= 0.5 && transitionProgressRef.current < 0.5001) {
+        // Switch scenes at halfway point (50%)
+        setObjects(generateTrees())
+        
+        // Generate new color scheme, ensuring it's different from previous
+        let newColorScheme = getRandomColorScheme()
+        while (newColorScheme.name === previousColorNameRef.current) {
+          newColorScheme = getRandomColorScheme()
         }
-      }, 16)
+        previousColorNameRef.current = newColorScheme.name
+        setColorScheme(newColorScheme)
+      }
+      
+      // Update fade overlay opacity based on transition progress
+      if (fadeOverlayRef.current) {
+        if (transitionProgressRef.current < 0.5) {
+          // Fade out (0 to 1)
+          fadeOverlayRef.current.material.opacity = transitionProgressRef.current * 2
+        } else {
+          // Fade in (1 to 0)
+          fadeOverlayRef.current.material.opacity = (1 - transitionProgressRef.current) * 2
+        }
+      }
+      
+      // Check if transition is complete
+      if (transitionProgressRef.current >= 1) {
+        isTransitioningRef.current = false
+        transitionProgressRef.current = 0
+        switchTimerRef.current = 0
+        if (fadeOverlayRef.current) {
+          fadeOverlayRef.current.material.opacity = 0
+        }
+      }
+    } else {
+      // Count up to switch interval
+      switchTimerRef.current += deltaTime
+      
+      if (switchTimerRef.current >= SWITCH_INTERVAL) {
+        isTransitioningRef.current = true
+        transitionProgressRef.current = 0
+        directionRef.current = Math.random() > 0.5 ? 1 : -1 // Randomize direction for next cycle
+      }
     }
 
     // Linear left-right movement with random direction

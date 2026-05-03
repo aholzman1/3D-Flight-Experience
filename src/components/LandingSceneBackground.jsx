@@ -219,7 +219,7 @@ function LandingSceneBackground({ objects: initialObjects, colorScheme: initialC
       }
     }
 
-    // Linear left-right movement with random direction
+    // Camera movement - ALWAYS ACTIVE, continuous panning
     const x = (timeRef.current * MOVEMENT_SPEED * directionRef.current) % 2400 - 1200 // Move left-right within bounds
     const height = 100 + Math.sin(timeRef.current * 0.05) * 50 // Gentle height variation
     const z = 800 // Keep Z fixed for forward-looking view

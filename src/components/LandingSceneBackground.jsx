@@ -23,9 +23,9 @@ function LandingSceneBackground({ objects: initialObjects, colorScheme: initialC
   
   const SWITCH_INTERVAL = 4 // seconds
   const FADE_DURATION = 1.5 // seconds for fade in/out
-  const CAMERA_MIN_HEIGHT = 20 // Starting height (just above ground)
-  const CAMERA_MAX_HEIGHT = 350 // Top view height
-  const CYCLE_DURATION = 15 // seconds for full up-down cycle
+  const CAMERA_MIN_HEIGHT = 80 // Starting height (above ground, looking at horizon)
+  const CAMERA_MAX_HEIGHT = 400 // Top view height (bird's eye)
+  const CYCLE_DURATION = 30 // seconds for full cycle
 
   // Setup camera path for smooth auto-flight
   useEffect(() => {
@@ -169,25 +169,41 @@ function LandingSceneBackground({ objects: initialObjects, colorScheme: initialC
   useFrame((state) => {
     const deltaTime = 1 / 60 // Roughly 16ms per frame
     
-    // Increment time for continuous upward movement
+    // Increment time for continuous movement
     timeRef.current += deltaTime
     
-    // Calculate camera height - moves from bottom to top over CYCLE_DURATION, then resets
+    // Calculate progress through cycle (0 to 1)
     const normalizedTime = (timeRef.current % CYCLE_DURATION) / CYCLE_DURATION
-    const height = CAMERA_MIN_HEIGHT + (CAMERA_MAX_HEIGHT - CAMERA_MIN_HEIGHT) * normalizedTime
     
-    // Get camera's current center position
+    // Get forest center
     if (objects.length > 0) {
       const centerX = objects.reduce((sum, obj) => sum + obj.x, 0) / objects.length
       const centerZ = objects.reduce((sum, obj) => sum + obj.z, 0) / objects.length
       
-      // Move camera upward while maintaining center position
-      camera.position.x = centerX
-      camera.position.y = height
-      camera.position.z = centerZ
+      // Easing function for smooth motion
+      const easeProgress = normalizedTime < 0.5 
+        ? 2 * normalizedTime * normalizedTime // ease in
+        : 1 - Math.pow(-2 * normalizedTime + 2, 2) / 2 // ease out
       
-      // Look down at center as camera rises
-      camera.lookAt(centerX, 0, centerZ)
+      // Start: far back, looking at trees on horizon
+      // End: directly above, looking down
+      const startDistance = 800
+      const startHeight = CAMERA_MIN_HEIGHT
+      const endHeight = CAMERA_MAX_HEIGHT
+      
+      // Smoothly interpolate camera position
+      const currentHeight = startHeight + (endHeight - startHeight) * easeProgress
+      const currentDistance = startDistance * (1 - easeProgress) // Moves from far to center
+      
+      camera.position.x = centerX
+      camera.position.y = currentHeight
+      camera.position.z = centerZ + currentDistance
+      
+      // Camera look direction: starts looking at horizon (slightly down from trees), ends looking straight down
+      const lookDownAmount = easeProgress // 0 at start, 1 at end
+      const lookDownY = 100 - (100 * lookDownAmount) // From 100 (looking forward) to 0 (looking down)
+      
+      camera.lookAt(centerX, lookDownY, centerZ)
     }
   })
 

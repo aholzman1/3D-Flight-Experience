@@ -17,14 +17,15 @@ function LandingSceneBackground({ objects: initialObjects, colorScheme: initialC
   const isTransitioningRef = useRef(false)
   const lightRef = useRef(null)
   const fadeOverlayRef = useRef(null)
-  const directionRef = useRef(Math.random() > 0.5 ? 1 : -1) // 1 for right, -1 for left
   const [objects, setObjects] = useState(initialObjects)
   const [colorScheme, setColorScheme] = useState(initialColorScheme)
   const previousColorNameRef = useRef(initialColorScheme?.name)
   
   const SWITCH_INTERVAL = 4 // seconds
   const FADE_DURATION = 1.5 // seconds for fade in/out
-  const MOVEMENT_SPEED = 0.4 // units per second (linear movement) - 33% faster
+  const CAMERA_MIN_HEIGHT = 20 // Starting height (just above ground)
+  const CAMERA_MAX_HEIGHT = 350 // Top view height
+  const CYCLE_DURATION = 15 // seconds for full up-down cycle
 
   // Setup camera path for smooth auto-flight
   useEffect(() => {
@@ -33,11 +34,11 @@ function LandingSceneBackground({ objects: initialObjects, colorScheme: initialC
       const centerX = initialObjects.reduce((sum, obj) => sum + obj.x, 0) / initialObjects.length
       const centerZ = initialObjects.reduce((sum, obj) => sum + obj.z, 0) / initialObjects.length
       
-      // Position camera where trees are visible, looking at center of tree cluster
-      camera.position.set(centerX - 300, 120, centerZ + 800)
+      // Position camera at bottom starting position, looking at center
+      camera.position.set(centerX, CAMERA_MIN_HEIGHT, centerZ)
       camera.lookAt(centerX, 60, centerZ)
     } else {
-      camera.position.set(200, 120, 800)
+      camera.position.set(0, CAMERA_MIN_HEIGHT, 0)
       camera.lookAt(0, 60, 0)
     }
   }, [camera, initialObjects])
@@ -164,79 +165,30 @@ function LandingSceneBackground({ objects: initialObjects, colorScheme: initialC
     return trees
   }
 
-  // Handle scene switching with fade transitions
+  // Handle continuous vertical camera movement
   useFrame((state) => {
     const deltaTime = 1 / 60 // Roughly 16ms per frame
     
-    // Increment timers
+    // Increment time for continuous upward movement
     timeRef.current += deltaTime
     
-    if (isTransitioningRef.current) {
-      // Update transition progress
-      transitionProgressRef.current += deltaTime / FADE_DURATION
+    // Calculate camera height - moves from bottom to top over CYCLE_DURATION, then resets
+    const normalizedTime = (timeRef.current % CYCLE_DURATION) / CYCLE_DURATION
+    const height = CAMERA_MIN_HEIGHT + (CAMERA_MAX_HEIGHT - CAMERA_MIN_HEIGHT) * normalizedTime
+    
+    // Get camera's current center position
+    if (objects.length > 0) {
+      const centerX = objects.reduce((sum, obj) => sum + obj.x, 0) / objects.length
+      const centerZ = objects.reduce((sum, obj) => sum + obj.z, 0) / objects.length
       
-      if (transitionProgressRef.current >= 0.5 && transitionProgressRef.current < 0.5001) {
-        // Switch scenes at halfway point (50%)
-        setObjects(generateTrees())
-        
-        // Generate new color scheme - only sunset and sunny for landing page
-        const schemes = [
-          { name: 'Sunset', skyColor: 0xffd9a3, fogColor: 0xffd9a3, fogDensity: 0.004, lightColor: '#fff8dc', lightIntensity: 1.5 },
-          { name: 'Sunny Day', skyColor: 0x87ceeb, fogColor: 0xb0d9ff, fogDensity: 0.002, lightColor: '#ffff99', lightIntensity: 2.0 }
-        ]
-        let newColorScheme = schemes[Math.floor(Math.random() * schemes.length)]
-        while (newColorScheme.name === previousColorNameRef.current) {
-          newColorScheme = schemes[Math.floor(Math.random() * schemes.length)]
-        }
-        previousColorNameRef.current = newColorScheme.name
-        setColorScheme(newColorScheme)
-      }
+      // Move camera upward while maintaining center position
+      camera.position.x = centerX
+      camera.position.y = height
+      camera.position.z = centerZ
       
-      // Update fade overlay opacity based on transition progress
-      if (fadeOverlayRef.current) {
-        if (transitionProgressRef.current < 0.5) {
-          // Fade out (0 to 1)
-          fadeOverlayRef.current.material.opacity = transitionProgressRef.current * 2
-        } else {
-          // Fade in (1 to 0)
-          fadeOverlayRef.current.material.opacity = (1 - transitionProgressRef.current) * 2
-        }
-      }
-      
-      // Check if transition is complete
-      if (transitionProgressRef.current >= 1) {
-        isTransitioningRef.current = false
-        transitionProgressRef.current = 0
-        switchTimerRef.current = 0
-        if (fadeOverlayRef.current) {
-          fadeOverlayRef.current.material.opacity = 0
-        }
-      }
-    } else {
-      // Count up to switch interval
-      switchTimerRef.current += deltaTime
-      
-      if (switchTimerRef.current >= SWITCH_INTERVAL) {
-        isTransitioningRef.current = true
-        transitionProgressRef.current = 0
-        directionRef.current = Math.random() > 0.5 ? 1 : -1 // Randomize direction for next cycle
-      }
+      // Look down at center as camera rises
+      camera.lookAt(centerX, 0, centerZ)
     }
-
-    // Camera movement - ALWAYS ACTIVE, continuous panning
-    const x = (timeRef.current * MOVEMENT_SPEED * directionRef.current) % 2400 - 1200 // Move left-right within bounds
-    let height = 80 + Math.sin(timeRef.current * 0.05) * 40 // Oscillate between 40 and 120
-    // Clamp height to keep camera within viewing range
-    height = Math.max(40, Math.min(120, height))
-    const z = 800 // Keep Z fixed for forward-looking view
-    
-    camera.position.x = x
-    camera.position.y = height
-    camera.position.z = z
-    
-    // Look straight ahead with slight upward/downward variation
-    const lookHeight = 60 + Math.sin(timeRef.current * 0.03) * 20
-    camera.lookAt(x + directionRef.current * 500, lookHeight, z - 100)
   })
 
   return (

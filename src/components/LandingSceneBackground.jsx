@@ -15,11 +15,13 @@ function LandingSceneBackground({ objects: initialObjects, colorScheme: initialC
   const switchTimerRef = useRef(0)
   const lightRef = useRef(null)
   const fadeOverlayRef = useRef(null)
+  const directionRef = useRef(Math.random() > 0.5 ? 1 : -1) // 1 for right, -1 for left
   const [objects, setObjects] = useState(initialObjects)
   const [colorScheme, setColorScheme] = useState(initialColorScheme)
   
   const SWITCH_INTERVAL = 5 // seconds
   const FADE_DURATION = 1.5 // seconds for fade in/out
+  const MOVEMENT_SPEED = 0.3 // units per second (linear movement)
 
   // Setup camera path for smooth auto-flight
   useEffect(() => {
@@ -158,6 +160,7 @@ function LandingSceneBackground({ objects: initialObjects, colorScheme: initialC
     // Check if it's time to switch scenes
     if (switchTimerRef.current >= SWITCH_INTERVAL) {
       switchTimerRef.current = 0
+      directionRef.current = Math.random() > 0.5 ? 1 : -1 // Randomize direction for next cycle
       
       // Fade out -> switch -> fade in
       const switchDuration = FADE_DURATION / 2
@@ -196,20 +199,18 @@ function LandingSceneBackground({ objects: initialObjects, colorScheme: initialC
       }, 16)
     }
 
-    // Create a smooth circular flight path around the scene (10% speed)
-    const radius = 1200
-    const height = 100 + Math.sin(timeRef.current * 0.05) * 50 // Gentle height variation at 10% speed
-    
-    const x = Math.sin(timeRef.current * 0.0003) * radius // 10% speed (0.003 * 0.1)
-    const z = Math.cos(timeRef.current * 0.0003) * radius // 10% speed
+    // Linear left-right movement with random direction
+    const x = (timeRef.current * MOVEMENT_SPEED * directionRef.current) % 2400 - 1200 // Move left-right within bounds
+    const height = 100 + Math.sin(timeRef.current * 0.05) * 50 // Gentle height variation
+    const z = 800 // Keep Z fixed for forward-looking view
     
     camera.position.x = x
     camera.position.y = height
     camera.position.z = z
     
-    // Look towards center with slight upward/downward variation
+    // Look straight ahead with slight upward/downward variation
     const lookHeight = 60 + Math.sin(timeRef.current * 0.03) * 20
-    camera.lookAt(0, lookHeight, 0)
+    camera.lookAt(x + directionRef.current * 500, lookHeight, z - 100)
   })
 
   return (

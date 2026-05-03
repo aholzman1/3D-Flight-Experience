@@ -145,6 +145,7 @@ function App() {
         >
           {colorScheme && <LandingSceneBackground objects={objects} colorScheme={colorScheme} />}
         </Canvas>
+        <div className="landing-fade-overlay"></div>
         <Landing onStartExperience={() => setPage('experience')} onInfo={() => setPage('info')} />
       </div>
     )

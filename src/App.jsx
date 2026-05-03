@@ -88,7 +88,12 @@ function App() {
     }
     
     setObjects(generateTrees())
-    setColorScheme(getRandomColorScheme())
+    // Start with sunset or sunny for landing page
+    const landingSchemes = [
+      { name: 'Sunset', skyColor: 0xffd9a3, fogColor: 0xffd9a3, fogDensity: 0.004, lightColor: '#fff8dc', lightIntensity: 1.5 },
+      { name: 'Sunny Day', skyColor: 0x87ceeb, fogColor: 0xb0d9ff, fogDensity: 0.002, lightColor: '#ffff99', lightIntensity: 2.0 }
+    ]
+    setColorScheme(landingSchemes[Math.floor(Math.random() * landingSchemes.length)])
   }, [])
 
   // Handle Escape key to pause/unpause

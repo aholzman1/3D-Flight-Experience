@@ -179,10 +179,14 @@ function LandingSceneBackground({ objects: initialObjects, colorScheme: initialC
         // Switch scenes at halfway point (50%)
         setObjects(generateTrees())
         
-        // Generate new color scheme, ensuring it's different from previous
-        let newColorScheme = getRandomColorScheme()
+        // Generate new color scheme - only sunset and sunny for landing page
+        const schemes = [
+          { name: 'Sunset', skyColor: 0xffd9a3, fogColor: 0xffd9a3, fogDensity: 0.004, lightColor: '#fff8dc', lightIntensity: 1.5 },
+          { name: 'Sunny Day', skyColor: 0x87ceeb, fogColor: 0xb0d9ff, fogDensity: 0.002, lightColor: '#ffff99', lightIntensity: 2.0 }
+        ]
+        let newColorScheme = schemes[Math.floor(Math.random() * schemes.length)]
         while (newColorScheme.name === previousColorNameRef.current) {
-          newColorScheme = getRandomColorScheme()
+          newColorScheme = schemes[Math.floor(Math.random() * schemes.length)]
         }
         previousColorNameRef.current = newColorScheme.name
         setColorScheme(newColorScheme)
@@ -221,7 +225,9 @@ function LandingSceneBackground({ objects: initialObjects, colorScheme: initialC
 
     // Camera movement - ALWAYS ACTIVE, continuous panning
     const x = (timeRef.current * MOVEMENT_SPEED * directionRef.current) % 2400 - 1200 // Move left-right within bounds
-    const height = 100 + Math.sin(timeRef.current * 0.05) * 50 // Gentle height variation
+    let height = 80 + Math.sin(timeRef.current * 0.05) * 40 // Oscillate between 40 and 120
+    // Clamp height to keep camera within viewing range
+    height = Math.max(40, Math.min(120, height))
     const z = 800 // Keep Z fixed for forward-looking view
     
     camera.position.x = x

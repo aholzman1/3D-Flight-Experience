@@ -6,14 +6,14 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
   const yaw = useRef(Math.PI) // Start facing origin
   const pitch = useRef(0)
   const velocity = useRef([0, 0, 0])
-  const touchStartPos = useRef({ x: 0, y: 0 })
-  const touchActive = useRef(false)
+  const gyroEnabled = useRef(false)
+  const deviceOrientation = useRef({ alpha: 0, beta: 0, gamma: 0 })
   
   const CAMERA_SPEED = 1.2
   const CONSTANT_FORWARD_SPEED = 0.525 // Increased by 5%
   const VERTICAL_SPEED = 0.525 // Increased by 5%
   const MOUSE_SENSITIVITY = 0.1125
-  const TOUCH_SENSITIVITY = 0.08 // Slightly lower for comfortable touch
+  const GYRO_SENSITIVITY = 0.05 // Sensitivity for gyroscopic rotation
   const MIN_HEIGHT = 1.0
   const MAX_HEIGHT = 190  // Doubled from 95
 
@@ -25,6 +25,24 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
       pitch.current = 0
     }
   }, [resetCount, camera])
+
+  // Request gyroscope permission (iOS 13+)
+  const requestGyroPermission = () => {
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission()
+        .then(permissionState => {
+          if (permissionState === 'granted') {
+            gyroEnabled.current = true
+            console.log('Gyroscope permission granted')
+          }
+        })
+        .catch(console.error)
+    } else {
+      // Non-iOS or older devices - gyro is allowed by default
+      gyroEnabled.current = true
+      console.log('Gyroscope enabled (non-iOS device)')
+    }
+  }
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -50,49 +68,67 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
       }
     }
 
-    const handleTouchStart = (e) => {
-      if (e.touches.length === 1) {
-        touchActive.current = true
-        touchStartPos.current = {
-          x: e.touches[0].clientX,
-          y: e.touches[0].clientY
-        }
-      }
-    }
+    const handleDeviceOrientation = (event) => {
+      if (!gyroEnabled.current) return
 
-    const handleTouchMove = (e) => {
-      if (touchActive.current && e.touches.length === 1) {
-        const deltaX = e.touches[0].clientX - touchStartPos.current.x
-        const deltaY = e.touches[0].clientY - touchStartPos.current.y
+      // Get device orientation angles
+      const alpha = event.alpha || 0 // Z axis rotation (0-360)
+      const beta = event.beta || 0   // X axis rotation (-180 to 180) - pitch
+      const gamma = event.gamma || 0 // Y axis rotation (-90 to 90) - roll
 
-        // Update camera rotation based on touch movement
-        yaw.current -= deltaX * TOUCH_SENSITIVITY * 0.01
-        pitch.current -= deltaY * TOUCH_SENSITIVITY * 0.01
+      // Map device orientation to camera control
+      // Beta controls pitch (up/down) - clamp to prevent over-rotation
+      pitch.current = (beta / 90) * (Math.PI / 2 - 0.1)
+      
+      // Gamma controls yaw (left/right) - but add to base yaw
+      // This creates a natural head-tracking feel
+      yaw.current = Math.PI + (gamma / 90) * (Math.PI / 3)
 
-        // Clamp pitch
-        if (pitch.current > Math.PI / 2 - 0.1) pitch.current = Math.PI / 2 - 0.1
-        if (pitch.current < -Math.PI / 2 + 0.1) pitch.current = -Math.PI / 2 + 0.1
-
-        // Update touch position for next frame
-        touchStartPos.current = {
-          x: e.touches[0].clientX,
-          y: e.touches[0].clientY
-        }
-      }
-    }
-
-    const handleTouchEnd = (e) => {
-      if (e.touches.length === 0) {
-        touchActive.current = false
-      }
+      deviceOrientation.current = { alpha, beta, gamma }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     window.addEventListener('keyup', handleKeyUp)
     document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('touchstart', handleTouchStart)
-    document.addEventListener('touchmove', handleTouchMove)
-    document.addEventListener('touchend', handleTouchEnd)
+    window.addEventListener('deviceorientation', handleDeviceOrientation)
+    
+    // Add button to request gyro on mobile
+    const enableGyroButton = document.createElement('button')
+    enableGyroButton.id = 'gyro-enable-btn'
+    enableGyroButton.style.cssText = `
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 200;
+      padding: 12px 20px;
+      background: #000000;
+      color: white;
+      border: 2px solid white;
+      border-radius: 25px;
+      font-size: 14px;
+      cursor: pointer;
+      display: none;
+      transition: all 0.3s ease;
+    `
+    enableGyroButton.textContent = 'Enable Gyro'
+    enableGyroButton.onclick = () => {
+      requestGyroPermission()
+      enableGyroButton.style.display = 'none'
+    }
+    enableGyroButton.onmouseover = () => {
+      enableGyroButton.style.background = '#1a1a1a'
+    }
+    enableGyroButton.onmouseout = () => {
+      enableGyroButton.style.background = '#000000'
+    }
+    document.body.appendChild(enableGyroButton)
+
+    // Show button on mobile devices
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+    if (isMobile && typeof DeviceOrientationEvent !== 'undefined') {
+      enableGyroButton.style.display = 'block'
+    }
+
     document.addEventListener('click', () => {
       document.body.requestPointerLock?.()
     })
@@ -101,9 +137,8 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
       document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('touchstart', handleTouchStart)
-      document.removeEventListener('touchmove', handleTouchMove)
-      document.removeEventListener('touchend', handleTouchEnd)
+      window.removeEventListener('deviceorientation', handleDeviceOrientation)
+      document.body.removeChild(enableGyroButton)
     }
   }, [])
 

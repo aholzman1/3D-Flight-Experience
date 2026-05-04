@@ -142,7 +142,7 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
         padding: 12px 20px;
         background: #000000;
         color: white;
-        border: 2px solid white;
+        border: none;
         border-radius: 25px;
         font-size: 14px;
         font-family: 'Future', 'Futura', 'Arial', sans-serif;
@@ -151,7 +151,6 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
         cursor: pointer;
         display: block;
         transition: all 0.3s ease;
-        text-transform: uppercase;
       `
     }
 
@@ -173,19 +172,18 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
         cursor: pointer;
         display: block;
         transition: all 0.3s ease;
-        text-transform: uppercase;
         box-shadow: 0 8px 32px rgba(255, 255, 255, 0.2);
       `
     }
 
     setButtonEnabledStyle()
-    enableGyroButton.textContent = 'ENABLE GYRO'
+    enableGyroButton.textContent = 'Enable Gyro'
     
     enableGyroButton.onclick = () => {
       if (!gyroEnabled.current) {
         // Enable gyro
         requestGyroPermission(() => {
-          enableGyroButton.textContent = 'DISABLE GYRO'
+          enableGyroButton.textContent = 'Disable Gyro'
           setButtonDisabledStyle()
           enableGyroButton.onmouseover = () => {
             enableGyroButton.style.background = 'rgba(255, 255, 255, 0.3)'
@@ -202,7 +200,7 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
         // Disable gyro
         gyroEnabled.current = false
         touchControlsEnabled.current = true
-        enableGyroButton.textContent = 'ENABLE GYRO'
+        enableGyroButton.textContent = 'Enable Gyro'
         setButtonEnabledStyle()
         enableGyroButton.onmouseover = () => {
           enableGyroButton.style.background = '#1a1a1a'

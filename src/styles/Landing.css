@@ -149,9 +149,34 @@
     padding: 0.8rem 1.5rem;
     font-size: 1rem;
     min-width: 160px;
+    touch-action: manipulation;
   }
 
   .landing-buttons {
     gap: 0.8rem;
+  }
+}
+
+@media (max-width: 320px) {
+  .landing-title {
+    font-size: 1.4rem;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+  }
+
+  .landing-credit {
+    font-size: 0.8rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .landing-btn {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.9rem;
+    min-width: 130px;
+    touch-action: manipulation;
+  }
+
+  .landing-buttons {
+    gap: 0.6rem;
   }
 }

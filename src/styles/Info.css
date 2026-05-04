@@ -151,6 +151,7 @@
   .info-box {
     padding: 2rem;
     max-width: 90%;
+    max-height: 80vh;
   }
 
   .info-box h1 {
@@ -164,5 +165,80 @@
 
   .info-box p {
     font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .info-box {
+    padding: 1.5rem;
+    max-width: 95%;
+    max-height: 85vh;
+    border-radius: 10px;
+  }
+
+  .info-box h1 {
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .info-box h2 {
+    font-size: 1rem;
+    margin-top: 0.8rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .info-box p {
+    font-size: 0.9rem;
+    margin: 0.4rem 0;
+  }
+
+  .info-box section {
+    margin-bottom: 0.6rem;
+  }
+
+  .back-btn {
+    padding: 0.8rem 1.5rem;
+    font-size: 0.9rem;
+    margin: 1.5rem auto 0;
+  }
+}
+
+@media (max-width: 320px) {
+  .info-box {
+    padding: 1rem;
+    max-width: 98%;
+    max-height: 90vh;
+    border-radius: 8px;
+  }
+
+  .info-box h1 {
+    font-size: 1.2rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .info-box h2 {
+    font-size: 0.95rem;
+    margin-top: 0.6rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .info-box p {
+    font-size: 0.85rem;
+    margin: 0.3rem 0;
+  }
+
+  .info-box ul {
+    margin: 0.4rem 0;
+  }
+
+  .info-box li {
+    padding: 0.2rem 0;
+    padding-left: 1.2rem;
+  }
+
+  .back-btn {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.8rem;
+    margin: 1rem auto 0;
   }
 }

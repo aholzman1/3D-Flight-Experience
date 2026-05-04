@@ -10,6 +10,7 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
   const touchControlsEnabled = useRef(true)
   const lastTouchPosition = useRef({ x: 0, y: 0 })
   const deviceOrientation = useRef({ alpha: 0, beta: 0, gamma: 0 })
+  const gyroButtonRef = useRef(null)
   
   const CAMERA_SPEED = 1.2
   const CONSTANT_FORWARD_SPEED = 0.525 // Increased by 5%
@@ -129,32 +130,88 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
     // Add button to request gyro on mobile
     const enableGyroButton = document.createElement('button')
     enableGyroButton.id = 'gyro-enable-btn'
-    enableGyroButton.style.cssText = `
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 200;
-      padding: 12px 20px;
-      background: #000000;
-      color: white;
-      border: 2px solid white;
-      border-radius: 25px;
-      font-size: 14px;
-      cursor: pointer;
-      display: none;
-      transition: all 0.3s ease;
-    `
-    enableGyroButton.textContent = 'Enable Gyro'
+    
+    const setButtonEnabledStyle = () => {
+      enableGyroButton.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 200;
+        padding: 12px 20px;
+        background: #000000;
+        color: white;
+        border: 2px solid white;
+        border-radius: 25px;
+        font-size: 14px;
+        font-family: 'Future', 'Futura', 'Arial', sans-serif;
+        font-weight: 600;
+        letter-spacing: 1px;
+        cursor: pointer;
+        display: block;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+      `
+    }
+
+    const setButtonDisabledStyle = () => {
+      enableGyroButton.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 200;
+        padding: 12px 20px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 2px solid white;
+        border-radius: 25px;
+        font-size: 14px;
+        font-family: 'Future', 'Futura', 'Arial', sans-serif;
+        font-weight: 600;
+        letter-spacing: 1px;
+        cursor: pointer;
+        display: block;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        box-shadow: 0 8px 32px rgba(255, 255, 255, 0.2);
+      `
+    }
+
+    setButtonEnabledStyle()
+    enableGyroButton.textContent = 'ENABLE GYRO'
+    
     enableGyroButton.onclick = () => {
-      requestGyroPermission()
-      enableGyroButton.style.display = 'none'
+      if (!gyroEnabled.current) {
+        // Enable gyro
+        requestGyroPermission()
+        if (gyroEnabled.current) {
+          enableGyroButton.textContent = 'DISABLE GYRO'
+          setButtonDisabledStyle()
+          enableGyroButton.onmouseover = () => {
+            enableGyroButton.style.background = 'rgba(255, 255, 255, 0.3)'
+            enableGyroButton.style.boxShadow = '0 12px 40px rgba(255, 255, 255, 0.3)'
+            enableGyroButton.style.transform = 'translateY(-2px)'
+          }
+          enableGyroButton.onmouseout = () => {
+            enableGyroButton.style.background = 'rgba(255, 255, 255, 0.2)'
+            enableGyroButton.style.boxShadow = '0 8px 32px rgba(255, 255, 255, 0.2)'
+            enableGyroButton.style.transform = 'translateY(0)'
+          }
+        }
+      } else {
+        // Disable gyro
+        gyroEnabled.current = false
+        touchControlsEnabled.current = true
+        enableGyroButton.textContent = 'ENABLE GYRO'
+        setButtonEnabledStyle()
+        enableGyroButton.onmouseover = () => {
+          enableGyroButton.style.background = '#1a1a1a'
+        }
+        enableGyroButton.onmouseout = () => {
+          enableGyroButton.style.background = '#000000'
+        }
+      }
     }
-    enableGyroButton.onmouseover = () => {
-      enableGyroButton.style.background = '#1a1a1a'
-    }
-    enableGyroButton.onmouseout = () => {
-      enableGyroButton.style.background = '#000000'
-    }
+    
     document.body.appendChild(enableGyroButton)
 
     // Show button on mobile devices

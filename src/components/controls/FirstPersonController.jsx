@@ -6,11 +6,14 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
   const yaw = useRef(Math.PI) // Start facing origin
   const pitch = useRef(0)
   const velocity = useRef([0, 0, 0])
+  const touchStartPos = useRef({ x: 0, y: 0 })
+  const touchActive = useRef(false)
   
   const CAMERA_SPEED = 1.2
   const CONSTANT_FORWARD_SPEED = 0.525 // Increased by 5%
   const VERTICAL_SPEED = 0.525 // Increased by 5%
   const MOUSE_SENSITIVITY = 0.1125
+  const TOUCH_SENSITIVITY = 0.08 // Slightly lower for comfortable touch
   const MIN_HEIGHT = 1.0
   const MAX_HEIGHT = 190  // Doubled from 95
 
@@ -47,9 +50,49 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
       }
     }
 
+    const handleTouchStart = (e) => {
+      if (e.touches.length === 1) {
+        touchActive.current = true
+        touchStartPos.current = {
+          x: e.touches[0].clientX,
+          y: e.touches[0].clientY
+        }
+      }
+    }
+
+    const handleTouchMove = (e) => {
+      if (touchActive.current && e.touches.length === 1) {
+        const deltaX = e.touches[0].clientX - touchStartPos.current.x
+        const deltaY = e.touches[0].clientY - touchStartPos.current.y
+
+        // Update camera rotation based on touch movement
+        yaw.current -= deltaX * TOUCH_SENSITIVITY * 0.01
+        pitch.current -= deltaY * TOUCH_SENSITIVITY * 0.01
+
+        // Clamp pitch
+        if (pitch.current > Math.PI / 2 - 0.1) pitch.current = Math.PI / 2 - 0.1
+        if (pitch.current < -Math.PI / 2 + 0.1) pitch.current = -Math.PI / 2 + 0.1
+
+        // Update touch position for next frame
+        touchStartPos.current = {
+          x: e.touches[0].clientX,
+          y: e.touches[0].clientY
+        }
+      }
+    }
+
+    const handleTouchEnd = (e) => {
+      if (e.touches.length === 0) {
+        touchActive.current = false
+      }
+    }
+
     window.addEventListener('keydown', handleKeyDown)
     window.addEventListener('keyup', handleKeyUp)
     document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('touchstart', handleTouchStart)
+    document.addEventListener('touchmove', handleTouchMove)
+    document.addEventListener('touchend', handleTouchEnd)
     document.addEventListener('click', () => {
       document.body.requestPointerLock?.()
     })
@@ -58,6 +101,9 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
       document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('touchstart', handleTouchStart)
+      document.removeEventListener('touchmove', handleTouchMove)
+      document.removeEventListener('touchend', handleTouchEnd)
     }
   }, [])
 

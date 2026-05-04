@@ -6,6 +6,7 @@ import Skybox from './shapes/Skybox'
 import VolumetricFog from './VolumetricFog'
 import AmbientBirdSounds from './effects/AmbientBirdSounds'
 import Rain from './effects/Rain'
+import SoftEffects from './effects/PostProcessing'
 import SceneObjects from './shapes/SceneObjects'
 import FirstPersonController from './controls/FirstPersonController'
 import { getTerrainHeight } from '../utils/terrain'
@@ -173,6 +174,9 @@ function Scene({ isActive, resetCount }) {
 
   return (
     <>
+      {/* Soft atmospheric effects */}
+      <SoftEffects colorScheme={colorScheme} />
+      
       {/* Skybox background */}
       <Skybox colorScheme={colorScheme} />
       

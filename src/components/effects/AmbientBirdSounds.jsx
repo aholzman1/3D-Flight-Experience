@@ -179,10 +179,10 @@ function AmbientBirdSounds({ rainIntensity = 'normal', isActive = true }) {
       filter.frequency.value = 600
 
       const gainNode = audioContextRef.current.createGain()
-      // Adjust wind volume based on rain intensity: 10% when no rain, 4% with normal rain, 15% with heavy rain
+      // Adjust wind volume based on rain intensity: 5% when no rain, 4% with normal rain, 15% with heavy rain
       let windVolume = 0.04
       if (rainIntensityRef.current === 'none') {
-        windVolume = 0.10
+        windVolume = 0.05
       } else if (rainIntensityRef.current === 'heavy') {
         windVolume = 0.15
       }

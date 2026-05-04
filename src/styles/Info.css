@@ -4,6 +4,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  background: linear-gradient(135deg, rgba(200, 150, 255, 0.3) 0%, rgba(150, 100, 200, 0.3) 100%);
   font-family: Futura, 'Trebuchet MS', Arial, sans-serif;
   position: absolute;
   top: 0;
@@ -16,22 +17,47 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 35%;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.3) 50%, transparent 100%);
-  z-index: 5;
+  height: 40%;
+  background: linear-gradient(to bottom, rgba(25, 50, 100, 0.8) 0%, rgba(25, 50, 100, 0.4) 50%, transparent 100%);
   pointer-events: none;
+  z-index: 5;
 }
 
+
+
 .info-box {
-  background: rgba(255, 255, 255, 0.97);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
   padding: 50px;
-  border-radius: 0px;
+  border-radius: 15px;
   max-width: 750px;
   max-height: 75vh;
   overflow-y: auto;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   z-index: 10;
   animation: slideUp 0.5s ease-out;
+  border: 2px solid white;
+}
+
+.info-box::-webkit-scrollbar {
+  width: 8px;
+}
+
+.info-box::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.info-box::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.info-box::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+  background-clip: content-box;
 }
 
 @keyframes slideUp {
@@ -46,73 +72,75 @@
 }
 
 .info-box h1 {
-  color: #667eea;
+  color: #ffffff;
   font-size: 2.5rem;
   margin-top: 0;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   text-align: center;
 }
 
 .info-box h2 {
-  color: #764ba2;
+  color: #ffffff;
   font-size: 1.4rem;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
+  margin-top: 1.2rem;
+  margin-bottom: 0.6rem;
 }
 
 .info-box p {
-  color: #333;
-  line-height: 1.8;
-  margin: 1rem 0;
+  color: #ffffff;
+  line-height: 1.5;
+  margin: 0.5rem 0;
   font-size: 1rem;
 }
 
 .info-box ul {
   list-style: none;
   padding: 0;
-  color: #333;
+  color: #ffffff;
+  margin: 0.5rem 0;
 }
 
 .info-box li {
-  padding: 0.5rem 0;
+  padding: 0.3rem 0;
   padding-left: 1.5rem;
   position: relative;
-  line-height: 1.8;
+  line-height: 1.5;
 }
 
 .info-box li:before {
-  content: "✓";
+  content: "•";
   position: absolute;
   left: 0;
-  color: #667eea;
+  color: #ffffff;
   font-weight: bold;
   font-size: 1.2rem;
 }
 
 .info-box section {
-  color: #333;
+  color: #ffffff;
+  margin-bottom: 0.8rem;
 }
 
 .back-btn {
   display: block;
-  margin: 3rem auto 0;
-  padding: 1rem 2rem;
+  margin: 2rem auto 0;
+  padding: 1rem 2.5rem;
   font-size: 1rem;
   font-weight: 600;
   border: none;
   border-radius: 50px;
   cursor: pointer;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #000000;
   color: white;
   transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  text-transform: capitalize;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .back-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
 }
 
 .back-btn:active {

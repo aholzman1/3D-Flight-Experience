@@ -5,7 +5,7 @@ function Info({ onBack }) {
     <div className="info">
       <div className="info-fade-overlay"></div>
       <div className="info-box">
-        <h1>About Dreamy Flight</h1>
+        <h1>ABOUT FLIGHT DREAM</h1>
         
         <section>
           <h2>Experience the Magic</h2>
@@ -39,7 +39,7 @@ function Info({ onBack }) {
         </section>
 
         <button className="back-btn" onClick={onBack}>
-          ← Back to Home
+          Back to Home
         </button>
       </div>
     </div>

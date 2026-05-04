@@ -215,6 +215,11 @@ function App() {
           }}>
             {!isActive ? 'Restart' : 'Resume'}
           </button>
+          {isPaused && (
+            <button className="back-button" onClick={() => handleRestart()}>
+              Reset
+            </button>
+          )}
           <button className="back-button" onClick={() => setPage('landing')}>
             Home
           </button>

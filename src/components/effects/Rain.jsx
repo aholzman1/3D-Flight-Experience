@@ -18,13 +18,12 @@ function Rain({ intensity = 'normal' }) {
       baseFallSpeed = 0
     } else if (intensity === 'normal') {
       rainCount = 25000
-      baseFallSpeed = 2.75 // average of 2.5-4.5
+      baseFallSpeed = 2.75
     } else if (intensity === 'heavy') {
       rainCount = 45000
-      baseFallSpeed = 4.0 // faster falling
+      baseFallSpeed = 4.0
     }
 
-    // Don't render anything if no rain
     if (rainCount === 0) {
       return
     }
@@ -32,33 +31,33 @@ function Rain({ intensity = 'normal' }) {
     const positions = new Float32Array(rainCount * 3)
     const velocities = new Float32Array(rainCount * 3)
     
-    // Initialize rain drop positions with full distribution across height range
+    // Initialize rain drop positions
     for (let i = 0; i < rainCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 500 // x - 500 radius
-      positions[i * 3 + 1] = Math.random() * 300 // y - random height across full range to start with rain already falling
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 500 // z - 500 radius
+      positions[i * 3] = (Math.random() - 0.5) * 500
+      positions[i * 3 + 1] = Math.random() * 300
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 500
       
-      velocities[i * 3] = 0 // no x velocity
-      // Randomize fall speed for each particle
-      const speedVariation = intensity === 'heavy' ? 1.5 : 2.0 // less variation for heavy rain (more uniform)
+      velocities[i * 3] = 0
+      const speedVariation = intensity === 'heavy' ? 1.5 : 2.0
       velocities[i * 3 + 1] = -(baseFallSpeed - speedVariation/2 + Math.random() * speedVariation)
-      velocities[i * 3 + 2] = 0 // no z velocity
+      velocities[i * 3 + 2] = 0
     }
 
-    // Create geometry and material
+    // Create geometry for line segments (2 vertices per raindrop)
+    const linePositions = new Float32Array(rainCount * 2 * 3)
     const geometry = new THREE.BufferGeometry()
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+    geometry.setAttribute('position', new THREE.BufferAttribute(linePositions, 3))
 
-    const material = new THREE.PointsMaterial({
+    // Use line material for motion blur streak effect
+    const material = new THREE.LineBasicMaterial({
       color: 0xdddddd,
-      size: 0.8,
-      sizeAttenuation: true,
       transparent: true,
-      opacity: 0.75,
+      opacity: 0.8,
       fog: false,
+      linewidth: 1,
     })
 
-    const rainMesh = new THREE.Points(geometry, material)
+    const rainMesh = new THREE.LineSegments(geometry, material)
     rainMesh.frustumCulled = false
     scene.add(rainMesh)
     rainRef.current = rainMesh
@@ -81,6 +80,9 @@ function Rain({ intensity = 'normal' }) {
     const resetHeight = 300
     const minHeight = 0
     const rainRadius = 500
+    const streakLength = 2.5 // Length of rain streak for motion blur effect
+
+    const linePositions = rainRef.current.geometry.attributes.position.array
 
     for (let i = 0; i < rainCount; i++) {
       // Update position with velocity
@@ -105,6 +107,17 @@ function Rain({ intensity = 'normal' }) {
         positions[i * 3 + 1] = resetHeight
         positions[i * 3 + 2] = camera.position.z + (Math.random() - 0.5) * rainRadius
       }
+
+      // Create line segment for this raindrop (motion blur streak)
+      // Start point (top of streak)
+      linePositions[i * 6] = positions[i * 3]
+      linePositions[i * 6 + 1] = positions[i * 3 + 1] + streakLength
+      linePositions[i * 6 + 2] = positions[i * 3 + 2]
+
+      // End point (bottom of streak, where raindrop is)
+      linePositions[i * 6 + 3] = positions[i * 3]
+      linePositions[i * 6 + 4] = positions[i * 3 + 1]
+      linePositions[i * 6 + 5] = positions[i * 3 + 2]
     }
 
     rainRef.current.geometry.attributes.position.needsUpdate = true

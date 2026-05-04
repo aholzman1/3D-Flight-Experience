@@ -11,6 +11,8 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
   const lastTouchPosition = useRef({ x: 0, y: 0 })
   const deviceOrientation = useRef({ alpha: 0, beta: 0, gamma: 0 })
   const gyroButtonRef = useRef(null)
+  const baselineBeta = useRef(0)
+  const baselineGamma = useRef(0)
   
   const CAMERA_SPEED = 1.2
   const CONSTANT_FORWARD_SPEED = 0.525 // Increased by 5%
@@ -111,14 +113,22 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
       const beta = event.beta || 0   // X axis rotation (-180 to 180) - pitch
       const gamma = event.gamma || 0 // Y axis rotation (-90 to 90) - roll
 
+      // Calibrate baseline on first reading when gyro is enabled
+      if (baselineBeta.current === 0 && baselineGamma.current === 0) {
+        baselineBeta.current = beta
+        baselineGamma.current = gamma
+      }
+
+      // Calculate relative motion from baseline
+      const relativeBeta = beta - baselineBeta.current
+      const relativeGamma = gamma - baselineGamma.current
+
       // Map device orientation to camera control
-      // When phone camera points forward (beta=0), camera faces forward
-      // Negate beta so natural phone direction = camera direction
-      pitch.current = (-beta / 90) * (Math.PI / 2 - 0.1)
+      // Phone aimed forward (relative position) → Look forward
+      pitch.current = (-relativeBeta / 90) * (Math.PI / 2 - 0.1)
       
-      // Gamma controls yaw (left/right) - but add to base yaw
-      // This creates a natural head-tracking feel
-      yaw.current = Math.PI + (gamma / 90) * (Math.PI / 3)
+      // Gamma controls yaw (left/right rotation)
+      yaw.current = Math.PI + (relativeGamma / 90) * (Math.PI / 3)
 
       deviceOrientation.current = { alpha, beta, gamma }
     }
@@ -201,6 +211,8 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
         // Disable gyro
         gyroEnabled.current = false
         touchControlsEnabled.current = true
+        baselineBeta.current = 0
+        baselineGamma.current = 0
         enableGyroButton.textContent = 'Enable Gyro'
         setButtonEnabledStyle()
         enableGyroButton.onmouseover = () => {

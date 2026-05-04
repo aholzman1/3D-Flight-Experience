@@ -112,8 +112,9 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
       const gamma = event.gamma || 0 // Y axis rotation (-90 to 90) - roll
 
       // Map device orientation to camera control
-      // Beta controls pitch (up/down) - clamp to prevent over-rotation
-      pitch.current = (beta / 90) * (Math.PI / 2 - 0.1)
+      // When phone is perpendicular to floor (upright, beta=90), camera faces forward
+      // Beta offset by 90 so upright phone = looking straight ahead
+      pitch.current = ((beta - 90) / 90) * (Math.PI / 2 - 0.1)
       
       // Gamma controls yaw (left/right) - but add to base yaw
       // This creates a natural head-tracking feel

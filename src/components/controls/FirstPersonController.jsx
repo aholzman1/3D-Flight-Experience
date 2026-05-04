@@ -30,7 +30,7 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
   }, [resetCount, camera])
 
   // Request gyroscope permission (iOS 13+)
-  const requestGyroPermission = () => {
+  const requestGyroPermission = (onGranted) => {
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
       DeviceOrientationEvent.requestPermission()
         .then(permissionState => {
@@ -38,6 +38,7 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
             gyroEnabled.current = true
             touchControlsEnabled.current = false
             console.log('Gyroscope permission granted')
+            if (onGranted) onGranted()
           }
         })
         .catch(console.error)
@@ -46,6 +47,7 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
       gyroEnabled.current = true
       touchControlsEnabled.current = false
       console.log('Gyroscope enabled (non-iOS device)')
+      if (onGranted) onGranted()
     }
   }
 
@@ -182,8 +184,7 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
     enableGyroButton.onclick = () => {
       if (!gyroEnabled.current) {
         // Enable gyro
-        requestGyroPermission()
-        if (gyroEnabled.current) {
+        requestGyroPermission(() => {
           enableGyroButton.textContent = 'DISABLE GYRO'
           setButtonDisabledStyle()
           enableGyroButton.onmouseover = () => {
@@ -196,7 +197,7 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
             enableGyroButton.style.boxShadow = '0 8px 32px rgba(255, 255, 255, 0.2)'
             enableGyroButton.style.transform = 'translateY(0)'
           }
-        }
+        })
       } else {
         // Disable gyro
         gyroEnabled.current = false

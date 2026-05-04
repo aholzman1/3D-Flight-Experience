@@ -7,6 +7,8 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
   const pitch = useRef(0)
   const velocity = useRef([0, 0, 0])
   const gyroEnabled = useRef(false)
+  const touchControlsEnabled = useRef(true)
+  const lastTouchPosition = useRef({ x: 0, y: 0 })
   const deviceOrientation = useRef({ alpha: 0, beta: 0, gamma: 0 })
   
   const CAMERA_SPEED = 1.2
@@ -33,6 +35,7 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
         .then(permissionState => {
           if (permissionState === 'granted') {
             gyroEnabled.current = true
+            touchControlsEnabled.current = false
             console.log('Gyroscope permission granted')
           }
         })
@@ -40,6 +43,7 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
     } else {
       // Non-iOS or older devices - gyro is allowed by default
       gyroEnabled.current = true
+      touchControlsEnabled.current = false
       console.log('Gyroscope enabled (non-iOS device)')
     }
   }
@@ -68,6 +72,34 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
       }
     }
 
+    const handleTouchStart = (e) => {
+      if (!touchControlsEnabled.current) return
+      lastTouchPosition.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+      }
+    }
+
+    const handleTouchMove = (e) => {
+      if (!touchControlsEnabled.current) return
+
+      const touch = e.touches[0]
+      const deltaX = touch.clientX - lastTouchPosition.current.x
+      const deltaY = touch.clientY - lastTouchPosition.current.y
+
+      yaw.current -= deltaX * MOUSE_SENSITIVITY * 0.01
+      pitch.current -= deltaY * MOUSE_SENSITIVITY * 0.01
+
+      // Clamp pitch
+      if (pitch.current > Math.PI / 2 - 0.1) pitch.current = Math.PI / 2 - 0.1
+      if (pitch.current < -Math.PI / 2 + 0.1) pitch.current = -Math.PI / 2 + 0.1
+
+      lastTouchPosition.current = {
+        x: touch.clientX,
+        y: touch.clientY,
+      }
+    }
+
     const handleDeviceOrientation = (event) => {
       if (!gyroEnabled.current) return
 
@@ -90,6 +122,8 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
     window.addEventListener('keydown', handleKeyDown)
     window.addEventListener('keyup', handleKeyUp)
     document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('touchstart', handleTouchStart)
+    document.addEventListener('touchmove', handleTouchMove)
     window.addEventListener('deviceorientation', handleDeviceOrientation)
     
     // Add button to request gyro on mobile
@@ -137,6 +171,8 @@ const FirstPersonController = forwardRef(({ camera, isActive = true, resetCount 
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
       document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('touchstart', handleTouchStart)
+      document.removeEventListener('touchmove', handleTouchMove)
       window.removeEventListener('deviceorientation', handleDeviceOrientation)
       document.body.removeChild(enableGyroButton)
     }

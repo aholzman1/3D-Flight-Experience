@@ -1,6 +1,7 @@
 import '../styles/Info.css'
 
 function Info({ onBack }) {
+  // Info page with navy overlay and lavender gradient background
   return (
     <div className="info">
       <div className="info-fade-overlay"></div>
